@@ -1,14 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="prism/prism.css" />
+    <link rel="stylesheet" href="style.css" />
     <title>Title</title>
-</head>
-<body>
-    <div class="test">
-        {{ .Text }}
+  </head>
+  <body class="post">
+    <div class="editor">
+      <header>
+        <nav>
+          <div class="close"></div>
+          <div class="minimize"></div>
+        </nav>
+        <div class="tab"></div>
+      </header>
+      <pre class="code">
+        <code class="language-go line-numbers">
+package main
+
+import "fmt"
+
+func main() {
+    resp, err := makeRequest()
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    dto, err := parseResponse(resp)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    err = saveQuotation(dto)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+}
+        </code>
+      </pre>
     </div>
-</body>
+    <script src="prism/prism.js" />
+  </body>
 </html>
