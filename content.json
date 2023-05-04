@@ -1,0 +1,4 @@
+{
+  "name": "test_nome",
+  "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    resp, err := makeRequest()\n    if err != nil {\n        fmt.Printf(\"Error: %v\\n\", err)\n        return\n    }\n\n    dto, err := parseResponse(resp)\n    if err != nil {\n        fmt.Printf(\"Error: %v\\n\", err)\n        return\n    }\n\n    err = saveQuotation(dto)\n    if err != nil {\n        fmt.Printf(\"Error: %v\\n\", err)\n        return\n    }\n}"
+}

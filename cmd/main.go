@@ -16,10 +16,18 @@ import (
 const (
 	API_USER = ""
 	API_KEY  = ""
+	TEMPLATES_FOLDER = "/template/"
 )
 
-type data struct {
-	Text string
+type content struct{
+	Name string
+	Code string
+}
+
+type args struct {
+	TemplateId string
+	OutputId string
+	TextFile string
 }
 
 type response struct {
@@ -34,33 +42,75 @@ type request struct {
 }
 
 func main() {
-	var d *data
+	a := &args{}
 	for i, arg := range os.Args[1:] {
-		if i == 0 {
-			d.Text = arg
+		switch (i){
+		case 0:
+			fmt.Println(arg)
+			a.TemplateId = arg
+		case 1:
+			a.OutputId = arg
+		case 2:
+			a.TextFile = arg
 		}
 	}
 
-	buffer := buildFromTemplate(d)
-	uri := createPngFromHtml(buffer.String())
-	downloadAndSaveFile(uri)
-}
+	fmt.Println(a)
 
-func buildFromTemplate(d *data) *bytes.Buffer {
-	buffer := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("test.html").ParseFiles("/home/victor.aragao/personal/code-to-image/template/test.html"))
-	err := t.Execute(buffer, d)
-	if err != nil {
-		fmt.Println("error on executing the template", err)
+	data, err := os.ReadFile(a.TextFile);
+	if err != nil{
+		fmt.Println("err on reading context file: ", err)
+		return
+	}
+	fmt.Println(string(data))
+	var cont *content
+	err = json.Unmarshal(data, &cont)
+
+	if err != nil{
+		fmt.Println("error unmarshaling the content: ", err)
+		return
 	}
 
-	return buffer
+	_, err = buildFromTemplate(a, cont)
+	if err != nil{
+		fmt.Println("error on building from template: ", err)
+		return
+	}
+
+	// uri := createPngFromHtml(buffer.String())
+	// downloadAndSaveFile(uri)
+}
+
+func buildFromTemplate(a *args, cont *content) (string, error) {
+	outputFile, err := os.Create("result/"+a.OutputId+".html")
+	if err != nil {
+		fmt.Println("error on creating output file: ", err)
+		return "", err
+	}
+	defer outputFile.Close()
+
+	currentFolder, err := os.Getwd()
+	if err != nil{
+		fmt.Println("error on getting current folder: ", err)
+		return "", err
+	}
+
+	t := template.Must(template.New(a.TemplateId).ParseFiles(currentFolder+TEMPLATES_FOLDER+a.TemplateId))
+	err = t.Execute(outputFile, cont)
+
+	if err != nil {
+		fmt.Println("error on executing the template: ", err)
+		return "", err
+	}
+
+	return a.OutputId, nil
 }
 
 func createPngFromHtml(html string) string {
 	reqBody, err := json.Marshal(map[string]string{
 		"html": html,
 	})
+
 	if err != nil {
 		log.Fatalf("unable to marshal data: %s", err.Error())
 	}
