@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="prism/prism.css" />
     <link rel="stylesheet" href="style.css" />
     <title>Title</title>
@@ -11,11 +14,16 @@
   <body class="post">
     <div class="editor">
       <header>
-        <nav>
-          <div class="close"></div>
-          <div class="minimize"></div>
+        <span class="tab">
+          <img src="assets/Go-Logo_Blue.svg" alt="golang-logo" class="logo">
+          <span>file.go</span>
+          <img src="assets/cross.svg" alt="close-tab-icon" class="close-icon">
+        </span>
+         <nav>
+          <span class="close"></span>
+          <span class="minimize"></span>
+          <span class="execute"></span>
         </nav>
-        <div class="tab"></div>
       </header>
       <pre class="code">
         <code class="language-go line-numbers">
@@ -45,6 +53,6 @@ func main() {
         </code>
       </pre>
     </div>
-    <script src="prism/prism.js" />
+    <script src="prism/prism.js" /></script>
   </body>
 </html>
