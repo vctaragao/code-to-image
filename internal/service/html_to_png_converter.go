@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"bytes"
@@ -9,26 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"text/template"
 	"time"
 )
 
 const (
 	API_USER = ""
 	API_KEY  = ""
-	TEMPLATES_FOLDER = "/template/"
 )
-
-type content struct{
-	Name string
-	Code string
-}
-
-type args struct {
-	TemplateId string
-	OutputId string
-	TextFile string
-}
 
 type response struct {
 	Url string `json:"url"`
@@ -41,72 +28,10 @@ type request struct {
 	body        []byte
 }
 
-func main() {
-	a := &args{}
-	for i, arg := range os.Args[1:] {
-		switch (i){
-		case 0:
-			fmt.Println(arg)
-			a.TemplateId = arg
-		case 1:
-			a.OutputId = arg
-		case 2:
-			a.TextFile = arg
-		}
-	}
-
-	fmt.Println(a)
-
-	data, err := os.ReadFile(a.TextFile);
-	if err != nil{
-		fmt.Println("err on reading context file: ", err)
-		return
-	}
-	fmt.Println(string(data))
-	var cont *content
-	err = json.Unmarshal(data, &cont)
-
-	if err != nil{
-		fmt.Println("error unmarshaling the content: ", err)
-		return
-	}
-
-	_, err = buildFromTemplate(a, cont)
-	if err != nil{
-		fmt.Println("error on building from template: ", err)
-		return
-	}
-
-	// uri := createPngFromHtml(buffer.String())
-	// downloadAndSaveFile(uri)
+type CreatePngFromHtml struct {
 }
 
-func buildFromTemplate(a *args, cont *content) (string, error) {
-	outputFile, err := os.Create("result/"+a.OutputId+".html")
-	if err != nil {
-		fmt.Println("error on creating output file: ", err)
-		return "", err
-	}
-	defer outputFile.Close()
-
-	currentFolder, err := os.Getwd()
-	if err != nil{
-		fmt.Println("error on getting current folder: ", err)
-		return "", err
-	}
-
-	t := template.Must(template.New(a.TemplateId).ParseFiles(currentFolder+TEMPLATES_FOLDER+a.TemplateId))
-	err = t.Execute(outputFile, cont)
-
-	if err != nil {
-		fmt.Println("error on executing the template: ", err)
-		return "", err
-	}
-
-	return a.OutputId, nil
-}
-
-func createPngFromHtml(html string) string {
+func Execute(html string) string {
 	reqBody, err := json.Marshal(map[string]string{
 		"html": html,
 	})
@@ -122,8 +47,8 @@ func createPngFromHtml(html string) string {
 	}
 
 	resp := makeRequest(req)
-
 	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalf("unable to read response body: %s", err.Error())
@@ -189,7 +114,7 @@ func addQueryParams(uri string, queryParams map[string]string) string {
 	for key, param := range queryParams {
 		values.Add(key, param)
 	}
-	uri = uri + "?" + values.Encode()
+	uri += values.Encode()
 
 	return uri
 }

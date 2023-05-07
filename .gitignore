@@ -1,1 +1,9 @@
 *.png
+*.json
+*.exe
+*.iss
+
+/var/*.log
+/draft/*.html
+!/template/**/*.json
+!example.json
