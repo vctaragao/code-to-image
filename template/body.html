@@ -1,0 +1,39 @@
+<div class="editor">
+  <header>
+    <span class="tab">
+      <img src="assets/Go-Logo_Blue.svg" alt="golang-logo" class="logo" />
+      <span>test</span>
+      <img src="assets/cross.svg" alt="close-tab-icon" class="close-icon" />
+    </span>
+    <nav>
+      <span class="close"></span>
+      <span class="minimize"></span>
+      <span class="execute"></span>
+    </nav>
+  </header>
+  <pre class="code">
+        <code class="language-go line-numbers">
+import "fmt"
+
+func main() {
+    resp, err := makeRequest()
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    dto, err := parseResponse(resp)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    err = saveQuotation(dto)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+}
+        </code>
+      </pre>
+</div>
