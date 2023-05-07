@@ -20,7 +20,7 @@ func newCreateCmd(codetoImage *internal.CodeToImage) *cobra.Command {
 		Use:   "create",
 		Short: "Crate an image from a html template",
 		Long:  `A longer description`,
-		Run:   run(codetoImage),
+		Run:   runCreateCmd(codetoImage),
 	}
 }
 
@@ -35,7 +35,7 @@ func init() {
 	createCmd.MarkFlagRequired("content")
 }
 
-func run(codeToImage *internal.CodeToImage) func(cmd *cobra.Command, args []string) {
+func runCreateCmd(codeToImage *internal.CodeToImage) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		if err := codeToImage.Create(templateId, outputId, content); err != nil {
 			helper.LogError("error on creating image from html template", err)
