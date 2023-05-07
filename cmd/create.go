@@ -4,12 +4,9 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	"io"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/vctaragao/code-to-image/internal"
+	"github.com/vctaragao/code-to-image/internal/helper"
 )
 
 var (
@@ -41,8 +38,7 @@ func init() {
 func run(codeToImage *internal.CodeToImage) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		if err := codeToImage.Create(templateId, outputId, content); err != nil {
-			logFile, _ := os.Create("var/app.log")
-			fmt.Fprintf(io.Writer(logFile), "error on creating image from html template: %+v", err)
+			helper.LogError("error on creating image from html template", err)
 		}
 	}
 }

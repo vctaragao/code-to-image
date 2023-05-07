@@ -33,7 +33,7 @@ var currentFolder string
 func Execute(dto *InputDto) error {
 	cont, err := getContentFromFile(dto.TextFile)
 	if err != nil {
-		return fmt.Errorf("error on getting content of text file: %v", err)
+		return fmt.Errorf("error on getting content of text file: %w", err)
 	}
 
 	currentFolder, err = os.Getwd()
@@ -57,7 +57,7 @@ func Execute(dto *InputDto) error {
 func getContentFromFile(file string) (*content, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return &content{}, fmt.Errorf("err on reading context file: %v", err)
+		return &content{}, fmt.Errorf("error on reading file: %w", err)
 	}
 
 	var cont *content
