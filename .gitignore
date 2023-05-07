@@ -1,3 +1,7 @@
 *.png
 *.log
+*.json
+*.exe
+*.iss
+!example.json
 !.gitkeep
