@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/vctaragao/code-to-image/internal/usecases/create"
+	"github.com/vctaragao/code-to-image/internal/usecases/list_template"
 )
 
 type CodeToImage struct {
@@ -18,8 +19,9 @@ func (c *CodeToImage) Create(templateId, outputId, textfile string) error {
 		TextFile:   textfile,
 	}
 
-	if err := create.Execute(dto); err != nil {
-		return err
-	}
-	return nil
+	return create.Execute(dto)
+}
+
+func (c *CodeToImage) ListTemplate() (list_template.OutputDto, error) {
+	return list_template.Execute()
 }

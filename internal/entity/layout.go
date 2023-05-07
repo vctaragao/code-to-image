@@ -1,6 +1,7 @@
 package entity
 
 type Layout struct {
+	Id     string
 	Body   []byte
 	Header []byte
 	Style  []byte
