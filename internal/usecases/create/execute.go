@@ -38,14 +38,12 @@ func Execute(dto *InputDto) error {
 
 	currentFolder, err = os.Getwd()
 	if err != nil {
-		fmt.Println("error on getting current folder: ", err)
-		return err
+		return fmt.Errorf("error on getting current folder: %w", err)
 	}
 
 	_, err = buildFromTemplate(dto, cont)
 	if err != nil {
-		fmt.Println("error on building from template: ", err)
-		return err
+		return fmt.Errorf("error on building from template: %w", err)
 	}
 
 	// uri := createPngFromHtml(buffer.String())
@@ -62,8 +60,7 @@ func getContentFromFile(file string) (*content, error) {
 
 	var cont *content
 	if err := json.Unmarshal(data, &cont); err != nil {
-		fmt.Println("error unmarshaling the content: ", err)
-		return &content{}, err
+		return &content{}, fmt.Errorf("error unmarshaling the content: %w", err)
 	}
 
 	return cont, nil
@@ -72,19 +69,16 @@ func getContentFromFile(file string) (*content, error) {
 func buildFromTemplate(dto *InputDto, cont *content) (string, error) {
 	body, err := fillTemplateBody(dto.TemplateId, cont)
 	if err != nil {
-		fmt.Println("error on filling template body: ", err)
-		return "", err
+		return "", fmt.Errorf("error on filling template body: %w", err)
 	}
 
-	post, err := fillLayout(dto.TemplateId, body)
+	draft, err := fillLayout(dto.TemplateId, body)
 	if err != nil {
-		fmt.Println("error on filling layout: ", err)
-		return "", err
+		return "", fmt.Errorf("error on filling layout: %w", err)
 	}
 
-	if err = os.WriteFile("result/"+dto.OutputId, post, 0644); err != nil {
-		fmt.Println("error on creating/writing to output file: ", err)
-		return "", err
+	if err = os.WriteFile("draft/"+dto.OutputId, draft, 0644); err != nil {
+		return "", fmt.Errorf("error on creating/writing to output file: %w", err)
 	}
 
 	return dto.OutputId, nil
