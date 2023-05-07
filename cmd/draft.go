@@ -14,7 +14,7 @@ import (
 func newDraftCmd(codeToImage *internal.CodeToImage) *cobra.Command {
 	return &cobra.Command{
 		Use:   "draft",
-		Short: "list the post drafts",
+		Short: "A list the post drafts",
 		Long:  `A longer description`,
 		Run:   runDraftCmd(codeToImage),
 	}
