@@ -13,11 +13,11 @@ func NewCodeToImage() *CodeToImage {
 	return &CodeToImage{}
 }
 
-func (c *CodeToImage) Create(templateId, outputId, textfile string) error {
+func (c *CodeToImage) Create(templateId, outputId, contentFile string) error {
 	dto := &create.InputDto{
-		TemplateId: templateId,
-		OutputId:   outputId,
-		TextFile:   textfile,
+		TemplateId:  templateId,
+		OutputId:    outputId,
+		ContentFile: contentFile,
 	}
 
 	return create.Execute(dto)

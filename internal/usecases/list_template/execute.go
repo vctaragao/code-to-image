@@ -9,21 +9,23 @@ import (
 )
 
 func Execute() (OutputDto, error) {
-	fileInfos, err := helper.GetDirectoryContent("template")
+	folders, err := helper.GetDirectoryContent("template")
 	if err != nil {
 		return OutputDto{}, fmt.Errorf("getting directory content: %w", err)
 	}
 
 	var out OutputDto
-	for _, fileInfo := range fileInfos {
-		if fileInfo.IsDir() && fileInfo.Name() != "layout" {
-			template, err := formatTemplate(fileInfo.Name())
-			if err != nil {
-				helper.LogError("invalid template: ", err)
-				continue
-			}
-			out.Templates = append(out.Templates, *template)
+	for _, folder := range folders {
+		if folder.Name() == "layout" {
+			continue
 		}
+
+		template, err := formatTemplate(folder.Name())
+		if err != nil {
+			helper.LogError("invalid template: ", err)
+			continue
+		}
+		out.Templates = append(out.Templates, *template)
 	}
 
 	return out, nil

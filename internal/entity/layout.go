@@ -1,13 +1,12 @@
 package entity
 
 type Layout struct {
-	Id     string
-	Body   []byte
-	Header []byte
-	Style  []byte
+	Body   string
+	Header string
+	Style  string
 }
 
-func NewLayout(body, header, style []byte) *Layout {
+func NewLayout(body, header, style string) *Layout {
 	return &Layout{
 		Body:   body,
 		Header: header,

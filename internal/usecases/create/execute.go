@@ -6,161 +6,107 @@ import (
 	"fmt"
 	"os"
 	"text/template"
+
+	"github.com/vctaragao/code-to-image/internal/entity"
+	"github.com/vctaragao/code-to-image/internal/helper"
 )
-
-const (
-	TEMPLATES_FOLDER = "template"
-	LAYOUTS_FOLDER   = "layout"
-)
-
-type content struct {
-	Name string `json:"name"`
-	Code string `json:"code"`
-}
-
-type config struct {
-	LayoutId string `json:"layout_id"`
-}
-
-type layout struct {
-	Body   string
-	Header string
-	Style  string
-}
-
-var currentFolder string
 
 func Execute(dto *InputDto) error {
-	cont, err := getContentFromFile(dto.TextFile)
+	cont, err := getContentFromFile(dto.ContentFile)
 	if err != nil {
-		return fmt.Errorf("error on getting content of text file: %w", err)
+		return fmt.Errorf("getting content file: %w", err)
 	}
 
-	currentFolder, err = os.Getwd()
-	if err != nil {
-		return fmt.Errorf("error on getting current folder: %w", err)
+	if err = buildFromTemplate(dto, cont); err != nil {
+		return fmt.Errorf("building from template: %w", err)
 	}
-
-	_, err = buildFromTemplate(dto, cont)
-	if err != nil {
-		return fmt.Errorf("error on building from template: %w", err)
-	}
-
-	// uri := createPngFromHtml(buffer.String())
-	// downloadAndSaveFile(uri)
 
 	return nil
 }
 
-func getContentFromFile(file string) (*content, error) {
+func getContentFromFile(file string) (*entity.Content, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return &content{}, fmt.Errorf("error on reading file: %w", err)
+		return &entity.Content{}, fmt.Errorf("reading content file: %w", err)
 	}
 
-	var cont *content
+	var cont *entity.Content
 	if err := json.Unmarshal(data, &cont); err != nil {
-		return &content{}, fmt.Errorf("error unmarshaling the content: %w", err)
+		return &entity.Content{}, fmt.Errorf("decoding content file: %w", err)
 	}
 
 	return cont, nil
 }
 
-func buildFromTemplate(dto *InputDto, cont *content) (string, error) {
+func buildFromTemplate(dto *InputDto, cont *entity.Content) error {
 	body, err := fillTemplateBody(dto.TemplateId, cont)
 	if err != nil {
-		return "", fmt.Errorf("error on filling template body: %w", err)
+		return fmt.Errorf("filling template body: %w", err)
 	}
 
 	draft, err := fillLayout(dto.TemplateId, body)
 	if err != nil {
-		return "", fmt.Errorf("error on filling layout: %w", err)
+		return fmt.Errorf("filling layout: %w", err)
 	}
 
 	if err = os.WriteFile("draft/"+dto.OutputId, draft, 0644); err != nil {
-		return "", fmt.Errorf("error on creating/writing to output file: %w", err)
+		return fmt.Errorf("creating/writing to output file: %w", err)
 	}
 
-	return dto.OutputId, nil
+	return nil
 }
 
-func fillTemplateBody(templateFolder string, cont *content) ([]byte, error) {
-	buffer := bytes.NewBuffer([]byte{})
-	templateBodyPath := getTemplatePath(templateFolder, "body.html")
+func fillTemplateBody(templateFolder string, cont *entity.Content) ([]byte, error) {
+	templateBodyPath, err := helper.GetTemplatePath(templateFolder, "body.html")
+	if err != nil {
+		return []byte{}, fmt.Errorf("getting template body path: %w", err)
+	}
 
+	buffer := bytes.NewBuffer([]byte{})
 	if err := template.Must(template.New("body.html").ParseFiles(templateBodyPath)).Execute(buffer, cont); err != nil {
-		fmt.Println("error on filling template body: ", err)
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("filling template body: %w", err)
 	}
 
 	return buffer.Bytes(), nil
 }
 
 func fillLayout(templateFolder string, body []byte) ([]byte, error) {
-	conf, err := getTemplateConfig(templateFolder, currentFolder)
+	conf, err := getTemplateConfig(templateFolder)
 	if err != nil {
-		fmt.Println("error on getting template config: ", err)
 		return []byte{}, err
 	}
 
-	header, err := getFileFromTemplate(templateFolder, "header.html")
+	header, err := helper.GetFileFromTemplate(templateFolder, "header.html")
 	if err != nil {
-		fmt.Println("error on getting header.html: ", err)
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("getting header.html: %w", err)
 	}
 
-	style, err := getFileFromTemplate(templateFolder, "style.css")
+	style, err := helper.GetFileFromTemplate(templateFolder, "style.css")
 	if err != nil {
-		fmt.Println("error on getting style.css: ", err)
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("getting style.css: %w", err)
 	}
 
-	lay := &layout{
-		Body:   string(body),
-		Header: string(header),
-		Style:  string(style),
-	}
-
-	layoutPath := getLayoutPath(conf.LayoutId)
+	layoutPath := helper.GetLayoutPath(conf.LayoutId)
+	layout := entity.NewLayout(string(body), string(header), string(style))
 
 	buffer := bytes.NewBuffer([]byte{})
-	if err = template.Must(template.New(conf.LayoutId).ParseFiles(layoutPath)).Execute(buffer, lay); err != nil {
-		fmt.Println("error on filling layout: ", err)
-		return []byte{}, err
+	if err = template.Must(template.New(conf.LayoutId).ParseFiles(layoutPath)).Execute(buffer, layout); err != nil {
+		return []byte{}, fmt.Errorf("filling layout: %w", err)
 	}
 
 	return buffer.Bytes(), nil
 }
 
-func getTemplateConfig(templateFolder string, currentFolder string) (*config, error) {
-	data, err := getFileFromTemplate(templateFolder, "config.json")
+func getTemplateConfig(templateFolder string) (*entity.Config, error) {
+	data, err := helper.GetFileFromTemplate(templateFolder, "config.json")
 	if err != nil {
-		fmt.Println("error on getting getting template config: ", err)
-		return &config{}, err
+		return &entity.Config{}, fmt.Errorf("getting template config file: %w", err)
 	}
 
-	var conf *config
-	json.Unmarshal(data, &conf)
-
-	return conf, err
-}
-
-func getTemplatePath(templateFolder, file string) string {
-	return fmt.Sprintf("%s\\%s\\%s\\%s", currentFolder, TEMPLATES_FOLDER, templateFolder, file)
-}
-
-func getLayoutPath(layout string) string {
-	return fmt.Sprintf("%s\\%s\\%s\\%s", currentFolder, TEMPLATES_FOLDER, LAYOUTS_FOLDER, layout)
-}
-
-func getFileFromTemplate(templateFolder, file string) ([]byte, error) {
-	filePath := getTemplatePath(templateFolder, file)
-
-	f, err := os.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("error on getting %s/%s: %v", templateFolder, file, err)
-		return []byte{}, err
+	var conf *entity.Config
+	if err := json.Unmarshal(data, &conf); err != nil {
+		return &entity.Config{}, fmt.Errorf("decoding template config file: %w", err)
 	}
 
-	return f, nil
+	return conf, nil
 }
