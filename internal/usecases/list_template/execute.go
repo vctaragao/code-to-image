@@ -3,27 +3,15 @@ package list_template
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/vctaragao/code-to-image/internal/entity"
 	"github.com/vctaragao/code-to-image/internal/helper"
 )
 
 func Execute() (OutputDto, error) {
-	currentFolder, err := os.Getwd()
+	fileInfos, err := helper.GetDirectoryContent("template")
 	if err != nil {
-		return OutputDto{}, fmt.Errorf("getting executable folder: %w", err)
-	}
-
-	dir, err := os.Open(currentFolder + "/template")
-	if err != nil {
-		return OutputDto{}, fmt.Errorf("openning templates folder: %w", err)
-	}
-	defer dir.Close()
-
-	fileInfos, err := dir.Readdir(-1)
-	if err != nil {
-		return OutputDto{}, fmt.Errorf("readding templates folder: %w", err)
+		return OutputDto{}, fmt.Errorf("getting directory content: %w", err)
 	}
 
 	var out OutputDto

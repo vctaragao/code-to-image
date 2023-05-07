@@ -28,3 +28,23 @@ func GetFileFromTemplate(templateFolder, file string) ([]byte, error) {
 func getTemplatePath(currentFolder, templateFolder, file string) string {
 	return fmt.Sprintf("%s\\%s\\%s\\%s", currentFolder, TEMPLATES_FOLDER, templateFolder, file)
 }
+
+func GetDirectoryContent(folder string) ([]os.FileInfo, error) {
+	currentFolder, err := os.Getwd()
+	if err != nil {
+		return []os.FileInfo{}, fmt.Errorf("getting current folder: %w", err)
+	}
+
+	dir, err := os.Open(currentFolder + "/" + folder)
+	if err != nil {
+		return []os.FileInfo{}, fmt.Errorf("openning %s folder: %w", folder, err)
+	}
+	defer dir.Close()
+
+	fileInfos, err := dir.Readdir(-1)
+	if err != nil {
+		return []os.FileInfo{}, fmt.Errorf("readding %s folder: %w", folder, err)
+	}
+
+	return fileInfos, nil
+}
